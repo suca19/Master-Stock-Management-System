@@ -1,0 +1,29 @@
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---- Python / Django ----
+__pycache__/
+*.py[cod]
+*.sqlite3
+backend/staticfiles/
+backend/media/
+backend/logs/
+*.log
+venv/
+.venv/
+
+# ---- Node / React ----
+node_modules/
+frontend/build/
+coverage/
+npm-debug.log*
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
