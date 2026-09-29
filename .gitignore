@@ -23,7 +23,11 @@ coverage/
 npm-debug.log*
 
 # ---- OS / editor ----
+.hintrc
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# ---- Private notes (never pushed) ----
+_private/
