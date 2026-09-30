@@ -1,252 +1,192 @@
+# Stock Management System
 
-## PROJECT
+A full-stack inventory and order management system. Staff record customer orders, stock is tracked
+through an auditable ledger, and access is controlled by user role.
 
-## Stock Management System
+## Tech Stack
 
-A full-stack inventory management system built with React and Django, featuring inventory management, order tracking, and user profile management.
+- **Frontend:** React 18, TypeScript, Tailwind CSS, Framer Motion (served by nginx)
+- **Backend:** Django 4.2, Django REST Framework, JWT authentication (SimpleJWT)
+- **Database:** MySQL 8
+- **Cache / queue:** Redis 7 (reserved for background jobs)
+- **Containers:** Docker Compose
 
 ## Features
 
-## Inventory Management
-- Complete CRUD operations for products
-- Real-time stock updates
-- Product filtering and search
-- Product categories
-- Stock level tracking
-- Product details view
+**Inventory**
+- Products with SKU, barcode, category, cost and selling price, and profit margin
+- Categories (nested) and suppliers
+- Low-stock detection per product (configurable threshold)
+- Stock ledger: every stock change is recorded as an append-only movement
+  (stock in, stock out, adjustment, return). Movements can't be edited or deleted.
 
-## Order Management
-- Order creation and tracking
-- Order status updates (Pending, Processing, Shipped, Delivered)
-- Order filtering by status
-- Order history
-- Customer information tracking
-- Total order value calculation
+**Orders**
+- Staff record orders on behalf of customers (name, email, phone, notes)
+- Totals are calculated on the server; product names and prices are saved on each order line,
+  so past orders never change when a product is updated
+- Placing an order removes stock in a single transaction: if any item lacks stock, nothing is saved
+- Status tracking: Pending → Processing → Shipped → Delivered; cancelling returns the stock
 
-## User Profile Management
-- User authentication and authorization
-- Profile viewing and editing
-- Personal information management
-- Email updates
-- Password management
-- User role management
+**Users & security**
+- Email login with JWT access and refresh tokens
+- Roles: `admin`, `manager`, `staff`
+- Public sign-up always creates `staff` accounts; only admins can grant roles
+- Passwords are hashed (PBKDF2) and checked against Django's password validators
+- All models are managed in the Django admin
 
-## UI/UX Features
-- Responsive design
-- Animated transitions using Framer Motion
-- Interactive tables and forms
-- Status color coding
-- Real-time updates
-- User-friendly interface
-- Form validation
-- Error handling
+## Project Structure
 
-## Prerequisites
+```
+├── backend/                 Django project
+│   ├── management/          Project settings (+ settings_test.py), root URLs, middleware
+│   ├── users/               Custom user model, roles, auth and profile endpoints
+│   ├── inventory/           Categories, products, suppliers, stock ledger (+ services.py)
+│   ├── orders/              Orders and order lines (+ services.py)
+│   ├── api/                 Login/register views, dashboard, API routing
+│   ├── */tests/             Tests for each app (pytest)
+│   ├── conftest.py          Shared test fixtures (users per role, API clients)
+│   ├── requirements.txt     Runtime dependencies
+│   ├── requirements-dev.txt Test tools (pytest, pytest-django, factory_boy)
+│   ├── .env.example         Environment template (copy to .env)
+│   └── Dockerfile
+├── frontend/                React + TypeScript client
+│   ├── src/                 Pages, components, auth context, API client
+│   ├── nginx.conf           Serves the built app, with client-side routing
+│   └── Dockerfile
+├── docker/mysql/init/       Runs on a fresh database volume (grants the test database)
+├── docs/                    User stories
+└── docker-compose.yml       MySQL, Redis, backend and frontend services
+```
 
-Before you begin, ensure you have the following installed:
-- Node.js (v14 or higher)
-- Python (v3.8 or higher)
-- pip (Python package manager)
-- Git
+Business rules live in each app's `services.py` (for example `inventory.services.record_stock_movement`
+and `orders.services.place_order`), not in views or model `save()` methods.
 
-## Installation
-`
-### Backend Setup (Django) for Windows
-Clone the repository: Open Command Prompt or PowerShell, then run:
+## Quick Start (Docker)
+
+You only need [Docker](https://docs.docker.com/get-docker/) with Docker Compose.
+
+1. Clone the repository:
+   ```bash
+   git clone git@github.com:suca19/Master-Stock-Management-System.git
+   cd Master-Stock-Management-System
+   ```
+
+2. Create your environment file from the template:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+   Edit `backend/.env` and replace every `change-me` value. The file explains how to generate a
+   `SECRET_KEY`. `backend/.env` holds your secrets and is ignored by git: never commit it.
+
+3. Build and start all services:
+   ```bash
+   docker compose up --build
+   ```
+   The first run takes a few minutes while MySQL creates its database. Migrations run automatically.
+
+4. Open the app:
+
+   | Service | URL |
+   |---|---|
+   | Frontend | http://localhost:3000 |
+   | API | http://localhost:8000/api/ |
+   | Django admin | http://localhost:8000/admin/ |
+
+   Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `backend/.env`. That admin account is
+   created (or updated) automatically every time the backend starts.
+
+### Useful commands
 
 ```bash
+docker compose down                        # stop everything (data is kept)
+docker compose down -v                     # stop and DELETE the database volume
+docker compose logs -f backend             # follow backend logs
+docker compose up -d --build frontend      # rebuild the frontend after changes
+docker compose exec backend python manage.py makemigrations   # after changing models
+docker compose exec db sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"'   # MySQL shell
+```
 
-git clone https://github.com/suca19/FinalProject-DorsetCollege/
-cd FinalProject-DorsetCollege/
-```
-Install Python (if not already installed): Download the latest version of Python from the official website: Python Downloads.
+Backend code is mounted into its container and reloads automatically. Frontend changes need a rebuild.
+MySQL (3306) and Redis (6379) are only reachable from your own machine.
 
-Make sure to check the box that says "Add Python to PATH" during installation.
-Create a virtual environment (recommended): In Command Prompt or PowerShell, navigate to your project directory and create a virtual environment:
-```bash
-Copy code
-python3 -m venv venv
-```
-Activate the virtual environment:
-```bash
-Copy code
-source venv/bin/activate 
-```
-Install the necessary Python dependencies: Navigate to the backend folder and install the required libraries:
-```bash
-Copy code
-cd backend
-pip install -r requirements.txt
-```
-Install Django and dependencies: You’ll need djangorestframework-simplejwt for authentication:
-```bash
-Copy code
-pip install djangorestframework-simplejwt
-```
- ```bash
-pip install python-dotenv
+## Running Tests
 
-pip install django-guardian pillow django-filter
-
-pip install whitenoise
-
-pip install django-cors-headers
-```
-Set up the database: Run the Django migrations to create the necessary tables in the database:
-```bash
-Copy code
-python manage.py migrate
-```
-Start the Django server:
+The backend has 133 tests, run with pytest against a real MySQL test database (`test_master_db`),
+so database constraints and row locking are tested exactly as they behave in production.
 
 ```bash
-Copy code
-python manage.py runserver
-```
-The backend server should now be running at http://127.0.0.1:8000/.
+docker compose exec backend pytest                      # run everything (~25 s)
+docker compose exec backend pytest orders               # one app
+docker compose exec backend pytest -k cancel            # tests whose name matches "cancel"
+docker compose exec backend pytest --create-db          # rebuild the test DB 
 
-### Front-End Setup (React) for Windows:
+## Frontend Development
 
-Install Node.js and npm: Download and install Node.js from the official website: Node.js Downloads. This will install both Node.js and npm (Node Package Manager).
-
-Navigate to the frontend directory: Open a new Command Prompt or PowerShell window, then:
-
-```bash
-Copy code
-cd frontend
-Install JavaScript dependencies: You can use either npm or yarn. If you don’t have Yarn installed, use npm:
-```
-Using npm:
+The React app is built inside Docker: `npm install` and `npm run build` run in the image's build stage,
+and nginx serves the result. That's why there is no `frontend/node_modules` folder on your machine,
+and why frontend changes need a rebuild:
 
 ```bash
-Copy code
-npm install
-```
-If you prefer Yarn (you may need to install Yarn first):
-
-```bash
-yarn install
-```
-Start the React development server:
-
-```bash
-npm start
-```
-Or, if using Yarn:
-
-```bash
-yarn start
+docker compose up -d --build frontend
 ```
 
-### Mac or Linux
-
-##Backend Setup (Django)
-
-```bash
-git clone https://github.com/suca19/fs-assignment-2-2024-71930/
-```
-
-```bash
-cd fs-assignment-2-2024-71930/
-```
-
-### 2. Set Up the Back-End (Django)
-
-install python if you don't have it, otherwise discard these steps 
-
-```bash
-brew install python
-```
-
-```bash
-sudo apt update
-sudo apt install python3
-```
-```bash
-sudo apt install python3-pip
-```
-
-- It's recommended to create a virtual environment to isolate your Python dependencies:
-
-```bash
-python3 -m venv venv
-```
-
-```bash
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-- Install the necessary Python dependencies using requirements.txt:
-
-```bash
-pip install -r backend/requirements.txt
-```
-### Set Up the Database:
-
-This project uses sqlite3 that is library that provides a lightweight disk-based database that doesn't require a separate server process and allows accessing the database.
-
-- Run the migrations to create the necessary tables in the database:
-
-```bash
-cd backend
-```
-
-```bash
-pip install djangorestframework-simplejwt
- ```
-
- ```bash
-pip install python-dotenv
-
-pip install django-guardian pillow django-filter
-
-pip install whitenoise
-
-pip install django-cors-headers
-```
-```bash
-python3 manage.py migrate
-```
-- Start the Django Server:
-
-```bash
-python3 manage.py runserver
-```
-
-The back-end will now be running at http://127.0.0.1:8000.
-
-### 3. Set Up the Front-End (React)
-
-Install Node.js Dependencies:
-
-Navigate to the front-end directory (if it's separate, e.g., frontend/):
+For autocompletion and type checking in your editor, install the dependencies locally as well
+(Node 18+; the folder is ignored by git):
 
 ```bash
 cd frontend
+npm install        # uses package-lock.json, so versions match the Docker build
 ```
 
--Install the JavaScript dependencies using either npm or yarn:
+| Route | Page | Access |
+|---|---|---|
+| `/login`, `/register` | Sign in / sign up | Public |
+| `/dashboard` | Overview | Signed in |
+| `/inventory` | Products | Signed in |
+| `/orders` | Orders | Signed in |
+| `/profile` | Profile (admin, manager and staff versions) | Signed in |
+| `/admin/*` | Admin area | Admins |
+| `/supervisor/*` | Team and reports | Managers and admins |
 
-- Using npm:
-    
-```bash
-npm install
-```
+Login, registration, profiles and user management use the real API. The Inventory and Orders pages
+still show sample data; the API endpoints behind them are ready.
 
-- Using yarn:
+## API Overview
 
-```bash
- yarn install
- ```
+All endpoints are under `/api/`, and all except login, register and token refresh require
+`Authorization: Bearer <access token>`.
 
-### Start the React Development Server:
+| Endpoint | Description |
+|---|---|
+| `POST auth/login/` | Get access and refresh tokens (email + password) |
+| `POST auth/register/` | Public sign-up (creates a `staff` account) |
+| `POST auth/token/refresh/` | Exchange a refresh token for a new access token |
+| `POST auth/change-password/` | Change your own password |
+| `GET/PATCH users/profile/` | Your own profile |
+| `users/` | List users (any signed-in user) · create, delete and change roles (admins) · `users/team-members/` lists active staff |
+| `categories/`, `products/`, `suppliers/`, `product-images/` | Inventory CRUD (admins write, staff read) · `products/low_stock/` |
+| `stock-movements/` | Stock ledger: list and record movements (append-only) |
+| `orders/` | List, create and update orders · `orders/<id>/cancel/` returns stock |
+| `GET dashboard/data/` | Product count, low-stock count, total stock value |
 
-```bash
-npm start   
-```
+List endpoints are paginated (20 per page) and support `?search=` and `?ordering=` where relevant.
 
-### Or if you're using Yarn: 
+## Roles & Permissions
 
- ```bash
-yarn start
-```
+The backend enforces every rule below; the frontend only hides what a role can't use.
+
+| Action | Admin | Manager | Staff |
+|---|:---:|:---:|:---:|
+| View products, categories, suppliers | ✅ | ❌ ¹ | ✅ |
+| Create, edit, delete products, categories, suppliers | ✅ | ❌ | ❌ |
+| Record stock movements | ✅ | ✅ | ✅ |
+| Create, update and cancel orders | ✅ | ✅ | ✅ |
+| View the dashboard | ✅ | ✅ | ✅ |
+| Edit own profile, change own password | ✅ | ✅ | ✅ |
+| Create or delete users, change roles | ✅ | ❌ | ❌ |
+
+¹ Known issue: managers should be able to view inventory. A test marks it as expected-to-fail until it's fixed.
+
+Nobody can edit or delete stock movements or delete orders: mistakes are corrected with an
+adjustment movement, and orders are cancelled instead.
+
