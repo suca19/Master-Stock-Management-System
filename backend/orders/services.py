@@ -13,7 +13,9 @@ class OrderError(Exception):
 
 
 @transaction.atomic
-def place_order(*, created_by, customer_name, items, customer_email="", customer_phone="", notes=""):
+def place_order(
+    *, created_by, customer_name, items, customer_email="", customer_phone="", notes=""
+):
     """
     Create an order, take the stock out, and snapshot names and prices.
 

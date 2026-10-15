@@ -2,7 +2,7 @@
 (function() {
     // Save the original ResizeObserver
     const OriginalResizeObserver = window.ResizeObserver;
-  
+
     // Create a wrapper for ResizeObserver that catches and suppresses the error
     window.ResizeObserver = function(callback) {
       const observer = new OriginalResizeObserver((...args) => {
@@ -15,10 +15,10 @@
           }
         }
       });
-  
+
       return observer;
     };
-  
+
     // Copy prototype methods
     window.ResizeObserver.prototype = OriginalResizeObserver.prototype;
   })();

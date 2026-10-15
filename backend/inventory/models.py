@@ -18,13 +18,13 @@ class Category(models.Model):
         verbose_name_plural = "categories"
         ordering = ["name"]
 
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
 
 
 class Product(models.Model):
@@ -34,10 +34,10 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="products")
 
-    cost_price = models.DecimalField(max_digits=10, decimal_places=2,
-                                     validators=[MinValueValidator(0)])
-    price = models.DecimalField(max_digits=10, decimal_places=2,
-                                validators=[MinValueValidator(0)])
+    cost_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
 
     # Only change stock through inventory.services.record_stock_movement()
     stock = models.PositiveIntegerField(default=0)
@@ -45,7 +45,10 @@ class Product(models.Model):
 
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="created_products",
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -147,10 +150,10 @@ class StockMovement(models.Model):
             ),
         ]
 
+    def __str__(self):
+        return f"{self.get_movement_type_display()} {self.quantity:+d} — product #{self.product_id}"
+
     def save(self, *args, **kwargs):
         if self.pk is not None:
             raise ValueError("Stock movements are immutable; record an adjustment instead.")
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.get_movement_type_display()} {self.quantity:+d} — product #{self.product_id}"

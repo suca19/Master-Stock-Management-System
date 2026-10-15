@@ -322,4 +322,3 @@ const WorkerProfile: React.FC<WorkerProfileProps> = ({ user }) => {
 }
 
 export default WorkerProfile
-

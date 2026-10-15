@@ -8,13 +8,15 @@ class InsufficientStock(Exception):
         self.product = product
         self.requested = requested
         super().__init__(
-            f"Not enough stock for {product.name}: {product.stock} available, {requested} requested."
+            f"Not enough stock for {product.name}: "
+            f"{product.stock} available, {requested} requested."
         )
 
 
 @transaction.atomic
-def record_stock_movement(*, product, quantity, movement_type, performed_by=None,
-                          reference="", notes=""):
+def record_stock_movement(
+    *, product, quantity, movement_type, performed_by=None, reference="", notes=""
+):
     """
     Apply a signed stock delta to a product and record it in the ledger.
 

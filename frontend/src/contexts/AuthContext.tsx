@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           // Set token in axios headers
           axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+
           // Verify token is still valid by making a request to profile endpoint
           const response = await axiosInstance.get("/users/profile/")
           setUser(response.data)
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem("user")
           localStorage.removeItem("token")
           localStorage.removeItem("refreshToken")
-          
+
           // Clear authorization header
           delete axiosInstance.defaults.headers.common['Authorization'];
         }
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("token", access)
       localStorage.setItem("refreshToken", refresh)
       localStorage.setItem("user", JSON.stringify(user))
-      
+
       // Set token in axios headers
       axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access}`;
 
@@ -100,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("user")
     localStorage.removeItem("token")
     localStorage.removeItem("refreshToken")
-    
+
     // Clear authorization header
     delete axiosInstance.defaults.headers.common['Authorization'];
   }
@@ -143,14 +143,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error
     }
   }
-  
+
   const updatePassword = async (currentPassword: string, newPassword: string) => {
     try {
       await axiosInstance.post("/auth/change-password/", {
         current_password: currentPassword,
         new_password: newPassword,
       })
-      
+
       return true
     } catch (error) {
       console.error("Password update error:", error)
@@ -173,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Convert single role to array for consistent handling
     const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles]
-    
+
     // Check if user's role is in the required roles array
     return roles.includes(user.role)
   }

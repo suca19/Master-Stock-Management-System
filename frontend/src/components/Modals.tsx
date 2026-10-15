@@ -93,7 +93,7 @@ const Modal = ({ children, handleClose, text, type }: { children: ReactNode, han
           exit="exit"
         >
             <div style={{background: 'white'}}>
-            {children} 
+            {children}
             <ModalButton onClick={handleClose} label="Close" />
             </div>
 
@@ -102,7 +102,7 @@ const Modal = ({ children, handleClose, text, type }: { children: ReactNode, han
 
       {type === "flip" && (
         <motion.div
-          onClick={(e) => e.stopPropagation()}   
+          onClick={(e) => e.stopPropagation()}
           className="modal  orange-gradient"
           variants={flip}
           initial="hidden"

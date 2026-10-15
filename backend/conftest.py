@@ -1,4 +1,5 @@
 """Fixtures shared by every app's tests."""
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -53,5 +54,5 @@ def staff_client(staff_user):
 def stocked_product(db, admin_user):
     """A product with 10 units in stock, put there through the ledger like real stock."""
     product = ProductFactory()
-    record_stock_movement(product=product, quantity=10, movement_type='in', performed_by=admin_user)
+    record_stock_movement(product=product, quantity=10, movement_type="in", performed_by=admin_user)
     return product
