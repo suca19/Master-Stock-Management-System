@@ -1,22 +1,26 @@
+"""
+Settings shared by every environment.
+
+Don't use this module directly: pick one of
+  management.settings.dev   local development (the default in backend/.env)
+  management.settings.prod  production; refuses to start without its secrets
+  management.settings.test  the pytest suite
+SECRET_KEY, DEBUG, ALLOWED_HOSTS and CORS origins are set per environment.
+"""
+
 import os
 from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load backend/.env when running outside Docker (inside Docker, compose already provides it)
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# backend/ — this file lives in backend/management/settings/, three levels down
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-key-for-development")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"  # Set default to True for development
-
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+DEBUG = False
 
 # Application definition
 INSTALLED_APPS = [
@@ -146,8 +150,7 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
 }
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS settings (which origins are allowed is set in dev.py / prod.py)
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
