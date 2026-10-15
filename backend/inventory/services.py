@@ -13,8 +13,9 @@ class InsufficientStock(Exception):
 
 
 @transaction.atomic
-def record_stock_movement(*, product, quantity, movement_type, performed_by=None,
-                          reference="", notes=""):
+def record_stock_movement(
+    *, product, quantity, movement_type, performed_by=None, reference="", notes=""
+):
     """
     Apply a signed stock delta to a product and record it in the ledger.
 

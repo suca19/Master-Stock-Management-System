@@ -26,8 +26,10 @@ class Order(models.Model):
         related_name="orders_created",
     )
     status = models.CharField(
-        max_length=20, choices=Status.choices,
-        default=Status.PENDING, db_index=True,
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
     )
 
     # snapshotted totals — set once, only mutated via orders.services
@@ -50,21 +52,22 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey("inventory.Product", on_delete=models.PROTECT, related_name="order_items")
+    product = models.ForeignKey(
+        "inventory.Product", on_delete=models.PROTECT, related_name="order_items"
+    )
 
     # snapshots so old orders stay accurate forever
     product_name = models.CharField(max_length=200)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2,
-                                     validators=[MinValueValidator(0)])
+    unit_price = models.DecimalField(
+        max_digits=10, decimal_places=2, validators=[MinValueValidator(0)]
+    )
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
         ordering = ["id"]
         constraints = [
-            models.UniqueConstraint(fields=["order", "product"],
-                                    name="unique_product_per_order"),
-            models.CheckConstraint(check=models.Q(quantity__gte=1),
-                                   name="orderitem_qty_gte_1"),
+            models.UniqueConstraint(fields=["order", "product"], name="unique_product_per_order"),
+            models.CheckConstraint(check=models.Q(quantity__gte=1), name="orderitem_qty_gte_1"),
         ]
 
     def __str__(self):
