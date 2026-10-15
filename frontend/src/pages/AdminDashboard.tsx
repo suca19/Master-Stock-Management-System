@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <motion.h1 
+      <motion.h1
         className="text-4xl font-bold text-gray-800 mb-8"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,8 +45,8 @@ const Dashboard = () => {
       </motion.h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {['Total Stocks', 'Total History', 'Total Categories', "Today's Visitors"].map((title, index) => (
-          <motion.div 
-            key={index} 
+          <motion.div
+            key={index}
             className="bg-white p-6 rounded-lg shadow-lg"
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -59,7 +59,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <motion.div 
+        <motion.div
           className="bg-white p-6 rounded-lg shadow-lg"
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -68,8 +68,8 @@ const Dashboard = () => {
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">Stock Statistics</h2>
           <Bar data={stockData} />
         </motion.div>
-        
-        <motion.div 
+
+        <motion.div
           className="bg-white p-6 rounded-lg shadow-lg"
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}

@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 // Add this to the top of your main file (index.tsx or App.tsx)
 const resizeObserverErrorHandler = () => {
   const resizeObserverError = "ResizeObserver loop completed with undelivered notifications";
-  
+
   window.addEventListener("error", (event) => {
     if (event.message === resizeObserverError) {
       event.stopImmediatePropagation();

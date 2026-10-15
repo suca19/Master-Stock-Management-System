@@ -7,10 +7,10 @@ import WorkerProfile from '../../pages/profile/WorkerProfile';
 
 const Profile: React.FC = () => {
   const { user, isLoading } = useAuth();
-  
+
   console.log('Profile component - user:', user);
   console.log('Profile component - user role:', user?.role);
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">

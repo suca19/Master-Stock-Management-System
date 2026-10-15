@@ -54,4 +54,3 @@ As an manger, I want to create/deactivate user accounts, so that ex-staff can't 
 As an manager, I want to assign roles, so that workers can't access manager features.
 
 As an manager, I want to view system activity logs, so that I can audit changes.
-

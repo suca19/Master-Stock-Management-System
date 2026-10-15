@@ -20,4 +20,3 @@ const RoleBasedComponent: React.FC<RoleBasedComponentProps> = ({ requiredRole, c
 }
 
 export default RoleBasedComponent
-

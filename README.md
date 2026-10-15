@@ -118,7 +118,7 @@ so database constraints and row locking are tested exactly as they behave in pro
 docker compose exec backend pytest                      # run everything (~25 s)
 docker compose exec backend pytest orders               # one app
 docker compose exec backend pytest -k cancel            # tests whose name matches "cancel"
-docker compose exec backend pytest --create-db          # rebuild the test DB 
+docker compose exec backend pytest --create-db          # rebuild the test DB
 
 ## Frontend Development
 
@@ -189,4 +189,3 @@ The backend enforces every rule below; the frontend only hides what a role can't
 
 Nobody can edit or delete stock movements or delete orders: mistakes are corrected with an
 adjustment movement, and orders are cancelled instead.
-

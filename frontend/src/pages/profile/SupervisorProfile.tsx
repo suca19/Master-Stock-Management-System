@@ -429,4 +429,3 @@ const SupervisorProfile: React.FC<SupervisorProfileProps> = ({ user }) => {
 }
 
 export default SupervisorProfile
-

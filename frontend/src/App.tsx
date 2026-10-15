@@ -33,7 +33,7 @@ const App: React.FC = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              
+
               {/* Protected routes for all authenticated users */}
               <Route element={<PrivateRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -41,17 +41,17 @@ const App: React.FC = () => {
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
-              
+
               {/* Protected routes for admin only */}
               <Route element={<PrivateRoute allowedRoles={['admin']} />}>
                 <Route path="/admin/*" element={<AdminDashboard />} />
               </Route>
-              
+
               {/* Protected routes for supervisor/manager only */}
               <Route element={<PrivateRoute allowedRoles={['manager', 'admin']} />}>
                 <Route path="/supervisor/*" element={<SupervisorRoutes />} />
               </Route>
-              
+
               {/* Unauthorized page */}
               <Route path="/unauthorized" element={<UnauthorizedPage />} />
             </Routes>

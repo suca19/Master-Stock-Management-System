@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     logout();
     navigate('/');
   };
@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
           transition={{ duration: 0.5 }}
         >
           {
-            isAuthenticated ? 
+            isAuthenticated ?
             <Link to="/dashboard" className="text-white text-2xl font-bold">StockMaster</Link>
             :
             <Link to="/" className="text-white text-2xl font-bold">StockMaster</Link>
@@ -57,4 +57,3 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-
