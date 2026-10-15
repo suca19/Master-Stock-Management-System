@@ -25,10 +25,7 @@ class IsWorkerOrAdmin(permissions.BasePermission):
             return True
 
         # Workers can only perform safe methods (GET, HEAD, OPTIONS)
-        if request.user.role == "staff" and request.method in permissions.SAFE_METHODS:
-            return True
-
-        return False
+        return request.user.role == "staff" and request.method in permissions.SAFE_METHODS
 
     def has_object_permission(self, request, view, obj):
         # Admin can do anything
@@ -36,10 +33,7 @@ class IsWorkerOrAdmin(permissions.BasePermission):
             return True
 
         # Workers can only view
-        if request.user.role == "staff" and request.method in permissions.SAFE_METHODS:
-            return True
-
-        return False
+        return request.user.role == "staff" and request.method in permissions.SAFE_METHODS
 
 
 class IsSelfOrAdmin(permissions.BasePermission):

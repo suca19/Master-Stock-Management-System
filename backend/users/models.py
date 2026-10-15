@@ -56,8 +56,9 @@ class User(AbstractUser):
 
     email = models.EmailField(_("email address"), unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=STAFF)
-    phone_number = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    # TODO(phase-2): drop null=True (needs a migration turning NULL into "")
+    phone_number = models.CharField(max_length=20, blank=True, null=True)  # noqa: DJ001
+    address = models.TextField(blank=True, null=True)  # noqa: DJ001
     profile_image = models.ImageField(upload_to="profile_images/", blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)

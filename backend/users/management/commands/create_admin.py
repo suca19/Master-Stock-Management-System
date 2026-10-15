@@ -50,5 +50,6 @@ class Command(BaseCommand):
         self.stdout.write("\nAll users in database:")
         for u in User.objects.all():
             self.stdout.write(
-                f"- {u.username} ({u.email}): role={getattr(u, 'role', 'N/A')}, is_staff={u.is_staff}"
+                f"- {u.username} ({u.email}): "
+                f"role={getattr(u, 'role', 'N/A')}, is_staff={u.is_staff}"
             )

@@ -18,13 +18,13 @@ class Category(models.Model):
         verbose_name_plural = "categories"
         ordering = ["name"]
 
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
 
 
 class Product(models.Model):
@@ -150,10 +150,10 @@ class StockMovement(models.Model):
             ),
         ]
 
+    def __str__(self):
+        return f"{self.get_movement_type_display()} {self.quantity:+d} — product #{self.product_id}"
+
     def save(self, *args, **kwargs):
         if self.pk is not None:
             raise ValueError("Stock movements are immutable; record an adjustment instead.")
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.get_movement_type_display()} {self.quantity:+d} — product #{self.product_id}"

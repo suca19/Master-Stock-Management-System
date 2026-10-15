@@ -35,7 +35,10 @@ def check_low_stock_levels():
     message = "The following products are low in stock:\n\n"
 
     for product in low_stock_products:
-        message += f"- {product.name}: {product.stock} remaining (threshold: {product.low_stock_threshold})\n"
+        message += (
+            f"- {product.name}: {product.stock} remaining "
+            f"(threshold: {product.low_stock_threshold})\n"
+        )
 
     message += "\nPlease restock these items as soon as possible."
 

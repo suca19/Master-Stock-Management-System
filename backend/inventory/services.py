@@ -8,7 +8,8 @@ class InsufficientStock(Exception):
         self.product = product
         self.requested = requested
         super().__init__(
-            f"Not enough stock for {product.name}: {product.stock} available, {requested} requested."
+            f"Not enough stock for {product.name}: "
+            f"{product.stock} available, {requested} requested."
         )
 
 

@@ -122,4 +122,4 @@ class StockMovementSerializer(serializers.ModelSerializer):
                 performed_by=self.context["request"].user, **validated_data
             )
         except InsufficientStock as e:
-            raise serializers.ValidationError({"quantity": str(e)})
+            raise serializers.ValidationError({"quantity": str(e)}) from e
