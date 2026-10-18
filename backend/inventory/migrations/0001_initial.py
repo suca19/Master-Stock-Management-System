@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='stockmovement',
-            constraint=models.CheckConstraint(check=models.Q(models.Q(('movement_type__in', ['in', 'return']), ('quantity__gt', 0)), models.Q(('movement_type', 'out'), ('quantity__lt', 0)), models.Q(('movement_type', 'adjustment'), models.Q(('quantity', 0), _negated=True)), _connector='OR'), name='stockmovement_sign_matches_type'),
+            constraint=models.CheckConstraint(condition=models.Q(models.Q(('movement_type__in', ['in', 'return']), ('quantity__gt', 0)), models.Q(('movement_type', 'out'), ('quantity__lt', 0)), models.Q(('movement_type', 'adjustment'), models.Q(('quantity', 0), _negated=True)), _connector='OR'), name='stockmovement_sign_matches_type'),
         ),
         migrations.AddIndex(
             model_name='product',
@@ -112,10 +112,10 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='product',
-            constraint=models.CheckConstraint(check=models.Q(('price__gte', 0)), name='product_price_gte_0'),
+            constraint=models.CheckConstraint(condition=models.Q(('price__gte', 0)), name='product_price_gte_0'),
         ),
         migrations.AddConstraint(
             model_name='product',
-            constraint=models.CheckConstraint(check=models.Q(('cost_price__gte', 0)), name='product_cost_gte_0'),
+            constraint=models.CheckConstraint(condition=models.Q(('cost_price__gte', 0)), name='product_cost_gte_0'),
         ),
     ]

@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='orderitem',
-            constraint=models.CheckConstraint(check=models.Q(('quantity__gte', 1)), name='orderitem_qty_gte_1'),
+            constraint=models.CheckConstraint(condition=models.Q(('quantity__gte', 1)), name='orderitem_qty_gte_1'),
         ),
         migrations.AddIndex(
             model_name='order',

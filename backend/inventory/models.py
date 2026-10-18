@@ -57,9 +57,13 @@ class Product(models.Model):
     class Meta:
         ordering = ["name"]
         indexes = [models.Index(fields=["category", "is_active"])]
+        # Enforced by the database too, so bad data can't sneak in outside the API.
+        # `condition=` replaced the old `check=` keyword (deprecated in 5.1, removed in 6.0)
         constraints = [
-            models.CheckConstraint(check=models.Q(price__gte=0), name="product_price_gte_0"),
-            models.CheckConstraint(check=models.Q(cost_price__gte=0), name="product_cost_gte_0"),
+            models.CheckConstraint(condition=models.Q(price__gte=0), name="product_price_gte_0"),
+            models.CheckConstraint(
+                condition=models.Q(cost_price__gte=0), name="product_cost_gte_0"
+            ),
         ]
 
     def __str__(self):
@@ -141,7 +145,7 @@ class StockMovement(models.Model):
         constraints = [
             # The sign of the delta must match the movement type
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(movement_type__in=["in", "return"], quantity__gt=0)
                     | models.Q(movement_type="out", quantity__lt=0)
                     | (models.Q(movement_type="adjustment") & ~models.Q(quantity=0))
