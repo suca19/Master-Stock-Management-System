@@ -67,7 +67,7 @@ class OrderItem(models.Model):
         ordering = ["id"]
         constraints = [
             models.UniqueConstraint(fields=["order", "product"], name="unique_product_per_order"),
-            models.CheckConstraint(check=models.Q(quantity__gte=1), name="orderitem_qty_gte_1"),
+            models.CheckConstraint(condition=models.Q(quantity__gte=1), name="orderitem_qty_gte_1"),
         ]
 
     def __str__(self):
