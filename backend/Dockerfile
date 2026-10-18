@@ -8,9 +8,12 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Install dependencies
+# build-essential + default-libmysqlclient-dev compile mysqlclient;
+# pkg-config lets mysqlclient >= 2.2 find the MySQL client library during that build
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     default-libmysqlclient-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt requirements-dev.txt ./
