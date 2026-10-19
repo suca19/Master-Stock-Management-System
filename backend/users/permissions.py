@@ -1,13 +1,31 @@
 from rest_framework import permissions
 
+from .models import User
 
-class IsAdminUser(permissions.BasePermission):
+# Everyone who works at the shop and may log in (customers never log in)
+INTERNAL_ROLES = frozenset({User.ADMIN, User.MANAGER, User.STAFF})
+
+
+class HasRole(permissions.BasePermission):
     """
-    Permission to only allow admin users to access the view.
+    Base class: allow signed-in users whose role is in `allowed_roles`.
+
+    Subclasses only declare the roles, so every rule is one line and role names
+    come from the User constants instead of repeated strings.
     """
+
+    allowed_roles = frozenset()
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == "admin"
+        user = request.user
+        # Anonymous users have no `role`; `is_authenticated` is False for them, so we stop there
+        return bool(user and user.is_authenticated and user.role in self.allowed_roles)
+
+
+class IsAdminUser(HasRole):
+    """Only admins."""
+
+    allowed_roles = frozenset({User.ADMIN})
 
 
 class IsWorkerOrAdmin(permissions.BasePermission):
@@ -50,15 +68,7 @@ class IsSelfOrAdmin(permissions.BasePermission):
         return obj == request.user
 
 
-class IsStaffMember(permissions.BasePermission):
-    """
-    Permission for internal users (admin, manager, staff).
-    Customers and anonymous users are rejected.
-    """
+class IsStaffMember(HasRole):
+    """Any internal user (admin, manager, staff). Customers and anonymous users are rejected."""
 
-    def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and request.user.role in ("admin", "manager", "staff")
-        )
+    allowed_roles = INTERNAL_ROLES
