@@ -56,20 +56,19 @@ class CatalogPermission(ReadWriteRoles):
 
 
 class IsSelfOrAdmin(permissions.BasePermission):
-    """
-    Permission to only allow users to edit their own profile or admins to edit any profile.
-    """
+    """Object-level: admins may edit any user; everyone else only themselves."""
 
     def has_object_permission(self, request, view, obj):
-        # Allow if user is admin
-        if request.user.role == "admin":
-            return True
-
-        # Allow if user is editing their own profile
-        return obj == request.user
+        return request.user.role == User.ADMIN or obj == request.user
 
 
 class IsStaffMember(HasRole):
     """Any internal user (admin, manager, staff). Customers and anonymous users are rejected."""
 
     allowed_roles = INTERNAL_ROLES
+
+
+class IsAdminOrManager(HasRole):
+    """People who manage the team: they may see every user account."""
+
+    allowed_roles = frozenset({User.ADMIN, User.MANAGER})
