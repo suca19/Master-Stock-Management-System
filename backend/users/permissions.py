@@ -16,10 +16,14 @@ class HasRole(permissions.BasePermission):
 
     allowed_roles = frozenset()
 
+    def roles_for(self, request):
+        """The roles allowed for this request. Override to vary them, e.g. by HTTP method."""
+        return self.allowed_roles
+
     def has_permission(self, request, view):
         user = request.user
         # Anonymous users have no `role`; `is_authenticated` is False for them, so we stop there
-        return bool(user and user.is_authenticated and user.role in self.allowed_roles)
+        return bool(user and user.is_authenticated and user.role in self.roles_for(request))
 
 
 class IsAdminUser(HasRole):
@@ -28,30 +32,27 @@ class IsAdminUser(HasRole):
     allowed_roles = frozenset({User.ADMIN})
 
 
-class IsWorkerOrAdmin(permissions.BasePermission):
+class ReadWriteRoles(HasRole):
     """
-    Permission to allow workers and admins to access the view.
-    Workers have read-only access to most resources.
+    One set of roles may read (GET, HEAD, OPTIONS); another set may also write.
+
+    Subclasses set `read_roles` and `write_roles`.
     """
 
-    def has_permission(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return False
+    read_roles = frozenset()
+    write_roles = frozenset()
 
-        # Admin can do anything
-        if request.user.role == "admin":
-            return True
+    def roles_for(self, request):
+        if request.method in permissions.SAFE_METHODS:
+            return self.read_roles
+        return self.write_roles
 
-        # Workers can only perform safe methods (GET, HEAD, OPTIONS)
-        return request.user.role == "staff" and request.method in permissions.SAFE_METHODS
 
-    def has_object_permission(self, request, view, obj):
-        # Admin can do anything
-        if request.user.role == "admin":
-            return True
+class CatalogPermission(ReadWriteRoles):
+    """Categories, products, images, suppliers: the whole shop reads, admins and managers edit."""
 
-        # Workers can only view
-        return request.user.role == "staff" and request.method in permissions.SAFE_METHODS
+    read_roles = INTERNAL_ROLES
+    write_roles = frozenset({User.ADMIN, User.MANAGER})
 
 
 class IsSelfOrAdmin(permissions.BasePermission):
