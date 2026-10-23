@@ -12,7 +12,7 @@ from inventory.views import (
 from orders.views import OrderViewSet
 from users.views import ChangeOwnPasswordView, ProfileView, UserViewSet
 
-from .views import CustomTokenObtainPairView, dashboard_data, register_user
+from .views import CustomTokenObtainPairView, dashboard_data
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet)
@@ -25,7 +25,7 @@ router.register(r"users", UserViewSet)
 
 urlpatterns = [
     # Explicit routes go before the router so they aren't matched as detail routes
-    path("auth/register/", register_user, name="register"),
+    # No self-registration: only shop staff log in, and an admin creates their accounts
     path("auth/login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("auth/change-password/", ChangeOwnPasswordView.as_view(), name="change_password"),

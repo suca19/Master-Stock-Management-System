@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .permissions import IsAdminUser, IsSelfOrAdmin
+from .permissions import IsAdminOrManager, IsAdminUser, IsSelfOrAdmin, IsStaffMember
 from .serializers import ProfileSerializer, UserSerializer, UserUpdateSerializer
 
 logger = logging.getLogger("users")
@@ -18,7 +18,13 @@ User = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """ViewSet for viewing and editing User instances."""
+    """
+    User accounts. Who may do what:
+      list, team-members     admin, manager
+      create, delete         admin
+      retrieve               admin, manager: anyone · staff: only themselves
+      update                 admin: anyone (incl. role) · others: only themselves (profile fields)
+    """
 
     # Hide django-guardian's internal anonymous user
     queryset = User.objects.exclude(email=guardian_settings.ANONYMOUS_USER_NAME)
@@ -26,16 +32,25 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view requires.
-        """
         if self.action in ["create", "destroy"]:
-            permission_classes = [IsAuthenticated, IsAdminUser]
+            permission_classes = [IsAdminUser]
+        elif self.action in ["list", "team_members"]:
+            permission_classes = [IsAdminOrManager]
         elif self.action in ["update", "partial_update"]:
-            permission_classes = [IsAuthenticated, IsSelfOrAdmin]
+            permission_classes = [IsStaffMember, IsSelfOrAdmin]
         else:
-            permission_classes = [IsAuthenticated]
+            # retrieve: get_queryset below limits what staff can see
+            permission_classes = [IsStaffMember]
         return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        # getattr: anonymous users have no role (e.g. when API docs inspect this view)
+        if getattr(self.request.user, "role", None) in (User.ADMIN, User.MANAGER):
+            return queryset
+        # Everyone else only "sees" their own account. Other ids answer 404, not 403,
+        # so nobody can probe which user ids exist.
+        return queryset.filter(pk=self.request.user.pk)
 
     def get_serializer_class(self):
         """

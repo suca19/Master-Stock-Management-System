@@ -5,10 +5,9 @@ from django.db.models import ProtectedError
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from users.permissions import IsAdminUser, IsStaffMember, IsWorkerOrAdmin
+from users.permissions import CatalogPermission, IsStaffMember
 
 from .models import Category, Product, ProductImage, StockMovement, Supplier
 from .serializers import (
@@ -40,18 +39,10 @@ class CategoryViewSet(ProtectedDestroyMixin, viewsets.ModelViewSet):
     queryset = Category.objects.all()
     protected_message = "This category still has products. Move or delete them first."
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticated, IsWorkerOrAdmin]
+    permission_classes = [CatalogPermission]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name", "description"]
     ordering_fields = ["name", "created_at"]
-
-    def get_permissions(self):
-        """
-        Override to ensure only admins can create, update or delete categories.
-        """
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsAdminUser()]
-        return super().get_permissions()
 
     def perform_create(self, serializer):
         category = serializer.save()
@@ -72,19 +63,11 @@ class ProductViewSet(ProtectedDestroyMixin, viewsets.ModelViewSet):
     queryset = Product.objects.select_related("category").prefetch_related("images")
     serializer_class = ProductSerializer
     protected_message = "This product has order or stock history. Set is_active to false instead."
-    permission_classes = [IsAuthenticated, IsWorkerOrAdmin]
+    permission_classes = [CatalogPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["category", "is_active"]
     search_fields = ["name", "description", "sku", "barcode"]
     ordering_fields = ["name", "price", "stock", "created_at"]
-
-    def get_permissions(self):
-        """
-        Override to ensure only admins can create, update or delete products.
-        """
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsAdminUser()]
-        return super().get_permissions()
 
     def perform_create(self, serializer):
         product = serializer.save()
@@ -111,15 +94,7 @@ class ProductImageViewSet(viewsets.ModelViewSet):
 
     queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
-    permission_classes = [IsAuthenticated, IsWorkerOrAdmin]
-
-    def get_permissions(self):
-        """
-        Override to ensure only admins can create, update or delete product images.
-        """
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsAdminUser()]
-        return super().get_permissions()
+    permission_classes = [CatalogPermission]
 
     def perform_create(self, serializer):
         # If this is set as primary, unset any existing primary images for this product
@@ -136,18 +111,10 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
     queryset = Supplier.objects.all()
     serializer_class = SupplierSerializer
-    permission_classes = [IsAuthenticated, IsWorkerOrAdmin]
+    permission_classes = [CatalogPermission]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name", "contact_name", "email", "phone"]
     ordering_fields = ["name", "created_at"]
-
-    def get_permissions(self):
-        """
-        Override to ensure only admins can create, update or delete suppliers.
-        """
-        if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAuthenticated(), IsAdminUser()]
-        return super().get_permissions()
 
 
 class StockMovementViewSet(viewsets.ModelViewSet):

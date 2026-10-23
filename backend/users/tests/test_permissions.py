@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import pytest
 from django.contrib.auth.models import AnonymousUser
 
-from users.permissions import IsAdminUser, IsSelfOrAdmin, IsStaffMember, IsWorkerOrAdmin
+from users.permissions import CatalogPermission, IsAdminUser, IsSelfOrAdmin, IsStaffMember
 
 
 def request_for(role=None, method="GET"):
@@ -43,21 +43,17 @@ def test_is_staff_member(role, allowed):
     "role, method, allowed",
     [
         ("admin", "POST", True),
+        ("manager", "GET", True),  # was the Phase 3 bug: managers couldn't even read
+        ("manager", "DELETE", True),
         ("staff", "GET", True),
         ("staff", "POST", False),
+        ("staff", "PATCH", False),
         ("customer", "GET", False),
         (None, "GET", False),
     ],
 )
-def test_is_worker_or_admin(role, method, allowed):
-    assert bool(IsWorkerOrAdmin().has_permission(request_for(role, method), None)) is allowed
-
-
-@pytest.mark.xfail(
-    strict=True, reason="Known issue, fixed in Phase 4: IsWorkerOrAdmin ignores the manager role"
-)
-def test_manager_can_read_inventory():
-    assert IsWorkerOrAdmin().has_permission(request_for("manager", "GET"), None)
+def test_catalog_permission(role, method, allowed):
+    assert CatalogPermission().has_permission(request_for(role, method), None) is allowed
 
 
 def test_is_self_or_admin():

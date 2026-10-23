@@ -55,6 +55,32 @@ class TestUserManagement:
         assert response.status_code == 201
         assert User.objects.get(email="newmgr@example.com").role == User.MANAGER
 
+    @pytest.mark.parametrize(
+        "password",
+        [
+            "1",  # too short
+            "password123",  # too common
+            "12345678901",  # entirely numeric
+        ],
+    )
+    def test_admin_cannot_create_user_with_weak_password(self, admin_client, password):
+        # Moved from the removed /auth/register/ tests: this is now the only way to create accounts
+        response = admin_client.post(
+            "/api/users/",
+            {
+                "username": "weak",
+                "email": "weak@example.com",
+                "password": password,
+                "first_name": "Weak",
+                "last_name": "Password",
+            },
+            format="json",
+        )
+
+        assert response.status_code == 400
+        assert "password" in response.data
+        assert not User.objects.filter(email="weak@example.com").exists()
+
     def test_staff_cannot_create_users(self, staff_client):
         response = staff_client.post("/api/users/", {"email": "x@example.com"}, format="json")
         assert response.status_code == 403
@@ -73,6 +99,15 @@ class TestUserManagement:
     def test_staff_cannot_edit_someone_else(self, staff_client):
         other = UserFactory()
         response = staff_client.patch(
+            f"/api/users/{other.id}/", {"first_name": "Hacked"}, format="json"
+        )
+        # 404: for staff, other accounts don't exist at all
+        assert response.status_code == 404
+
+    def test_manager_sees_but_cannot_edit_someone_else(self, manager_client):
+        other = UserFactory()
+        assert manager_client.get(f"/api/users/{other.id}/").status_code == 200
+        response = manager_client.patch(
             f"/api/users/{other.id}/", {"first_name": "Hacked"}, format="json"
         )
         assert response.status_code == 403
